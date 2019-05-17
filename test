@@ -1,0 +1,162 @@
+public class TestActivity extends Activity implements View.OnClickListener {
+    private static final String TAG = "jrr";
+    private static final long threeDay = 24 * 60 * 60 * 3;
+    private long mTime;
+    private Button mSatrtButton;
+    private TextView mDescrible;
+    private SharedPreferences preferences;
+    private int count;
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.test_layout);
+        mSatrtButton = findViewById(R.id.start);
+        mDescrible = findViewById(R.id.describle);
+        mDescrible.setText(null);
+        mSatrtButton.setOnClickListener(this);
+
+    }
+
+    @Override
+    public void onClick(View v) {
+        int currentVersionCode = getVersionCode(this);
+        int spVersionCode = getSpVersiondata();
+        showTextDescrible(currentVersionCode,spVersionCode);
+        Log.e(TAG, "onClick: " + currentVersionCode + ":" + spVersionCode);
+
+    }
+
+    private void showTextDescrible(int currentcode, int spCode) {
+        if (currentcode > spCode) {
+            mDescrible.setText("欢迎初次使用");
+            mTime = System.currentTimeMillis();
+        } else {
+            long time = System.currentTimeMillis();
+            long interval = time - mTime;
+            if (interval < threeDay) {
+                mDescrible.setText("欢迎经常使用");
+            } else {
+                mDescrible.setText("好久不见，欢迎再次使用");
+            }
+            mTime = time;
+        }
+        commitData(currentcode);
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mDescrible.setText(null);
+    }
+
+    // 读取数据
+    private int getSpVersiondata() {
+        preferences = getSharedPreferences("VersionCode", MODE_PRIVATE);
+        int versionCode = preferences.getInt("VersionCode", 0);
+        Log.d(TAG, "getData: spVersionCode = " + versionCode);
+        return versionCode;
+    }
+
+    // 提交数据
+    private void commitData(int data) {
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt("VersionCode", data);
+        editor.commit();
+
+    }
+
+    /**
+     * 获取版本号
+     */
+    private int getVersionCode(Context context) {
+        int versionCode = 0;
+        try {
+            versionCode = context.getPackageManager().getPackageInfo(context.getPackageName(),
+                    0).versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "getVersionCode: NameNotFoundException");
+        }
+        Log.e(TAG, "getVersionCode: " + versionCode);
+        return versionCode;
+    }
+}
+
+@RunWith(AndroidJUnit4.class)
+public class ExampleInstrumentedTest {
+    private static final String TAG = "jrr";
+    @Test
+    public void useAppContext() {
+        // Context of the app under test.
+        Context appContext = InstrumentationRegistry.getTargetContext();
+
+        assertEquals("com.huawei.myjnitest", appContext.getPackageName());
+    }
+
+    // 测试获取当前版本
+    @Test
+    public void testgetVersioncode(){
+        Context appContext = InstrumentationRegistry.getTargetContext();
+        int versionCode = 0;
+        try {
+            versionCode = appContext.getPackageManager().getPackageInfo(appContext.getPackageName(),
+                    0).versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "getVersionCode: NameNotFoundException");
+        }
+        Assert.assertNotNull(versionCode);
+    }
+
+    // 测试获取sp版本
+    @Test
+    public void testgetspVersioncode(){
+        Context context = InstrumentationRegistry.getTargetContext();
+        SharedPreferences preferences = context.getSharedPreferences("VersionCode", Context.MODE_PRIVATE);
+        int spversionCode = preferences.getInt("VersionCode", 0);
+        Assert.assertNotNull(spversionCode);
+    }
+
+}
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/describle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:textSize="16dp" />
+    <Button
+        android:id="@+id/start"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:textSize="16dp"
+        android:text="start"/>
+        
+        android:versionCode="1"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
